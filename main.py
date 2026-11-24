@@ -1,7 +1,9 @@
-from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, Request
+from fastapi.templating import Jinja2Templates
 
 app = FastAPI()
+
+templates = Jinja2Templates(directory="templates")
 
 items: list[dict] = [
     {"id": 1,
@@ -21,11 +23,10 @@ items: list[dict] = [
 ]
 
 
-@app.get("/api/posts", response_class=HTMLResponse, include_in_schema=False)
-
-@app.get("/posts", response_class=HTMLResponse, include_in_schema=False)
-def home():
-    return f"<h1>{items[0]['id']}</h1>"
+@app.get("/", include_in_schema=False)
+@app.get("/posts", include_in_schema=False)
+def home(request: Request):
+    return templates.TemplateResponse(request, "home.html", {"items": items, "title": "Home"})
 
 
 @app.get("/api")
@@ -33,9 +34,9 @@ def home_api():
     return {"message": "Hello World"}
 
 
-@app.get("/")
-def get_posts():
-    return items
+@app.get("/api/posts")
+def get_posts(): 
+    return items   
 
 
 # To run this FastAPI application, you can use the following command in your terminal:
